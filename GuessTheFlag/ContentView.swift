@@ -12,6 +12,10 @@ struct ContentView: View {
     @State private var correctAnswer = Int.random(in: 0...2)
     @State private var showingScore = false
     @State private var scoreTitle = ""
+    @State private var score = 0
+    @State private var countryPicked = 0
+    @State private var turnNumber = 0
+    @State private var gameOver = false
     var body: some View {
         ZStack{
             //LinearGradient(gradient: Gradient(colors: [.blue,.black]), startPoint: .top, endPoint: .bottom)
@@ -53,7 +57,7 @@ struct ContentView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 20))
                 Spacer()
                 Spacer()
-                Text("Score: ???")
+                Text("Score: \(score)")
                     .font(.title.bold())
                     .foregroundColor(.white)
                 Spacer()
@@ -63,23 +67,47 @@ struct ContentView: View {
             .alert(scoreTitle, isPresented: $showingScore){
             Button("Continue", action: askQuestion)
             } message: {
-                Text("Your score is ???")
+                if(scoreTitle == "Wrong"){
+                    Text("Nope! That's the flag of \(countries[countryPicked])")
+                }else{
+                    Text("Your score is \(score)")
+                }
+
+            }
+            .alert("Game Over", isPresented: $gameOver ){
+                Button("Restart", action:restart)
+            }message: {
+                Text("Total score is \(score). Would you like to play again?")
             }
 
         }
     }
     func flagTapped(_ number:Int){
+        countryPicked = number
         if number == correctAnswer{
             scoreTitle = "Correct"
+            score += 1
+            turnNumber += 1
         }else{
             scoreTitle = "Wrong"
+            turnNumber += 1
         }
         showingScore = true
+        if(turnNumber >= 8){
+            gameOver = true
+        }
+        
     }
     
     func askQuestion(){
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
+        
+    }
+    func restart(){
+        turnNumber = 0
+        score = 0
+        askQuestion()
     }
 }
 
